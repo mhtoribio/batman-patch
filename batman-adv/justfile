@@ -1,0 +1,91 @@
+set shell := ["bash", "-euo", "pipefail", "-c"]
+
+# Override these if needed:
+modname := "batman_adv"
+ko := "net/batman-adv/batman-adv.ko"
+batif := "bat0"
+kernelpath := "/lib/modules/$(uname -r)/build"
+
+default:
+    just --list
+
+# Build the module
+build:
+    make KERNELPATH={{kernelpath}}
+
+# Clean build outputs
+clean:
+    make clean || true
+
+# Show whether the expected kernel build tree exists
+check-kernelpath:
+    echo "kernelpath={{kernelpath}}"
+    ls -ld {{kernelpath}}
+
+# Show module file info
+info:
+    ls -l {{ko}}
+    modinfo {{ko}} | sed -n '1,40p'
+
+# Make sure cfg80211 and bridge symbol dependencies are loaded
+setup:
+    sudo modprobe cfg80211
+    sudo modprobe bridge
+
+# Unload in-tree or previously loaded batman module
+unload: ns-down
+    sudo modprobe -r {{modname}} 2>/dev/null || sudo rmmod {{modname}} 2>/dev/null || true
+
+# Insert the freshly built module directly
+insmod: setup
+    sudo insmod {{ko}}
+
+# Full reload cycle
+reload: unload insmod
+
+# One-command smoke test: rebuild, reload, bring up namespaces, inspect state
+smoke: build reload ns-up ns-show
+
+# Follow kernel log messages related to batman-adv
+logs:
+    sudo dmesg -w | grep --line-buffered batman_adv
+
+# List currently loaded batman modules
+lsmod:
+    lsmod | grep batman || true
+
+# Namespace demo: create a minimal 2-node batman test
+ns-up algo="BATMAN_V":
+    sudo ip netns add n0 2>/dev/null || true
+    sudo ip netns add n1 2>/dev/null || true
+    sudo ip link add ve0 type veth peer name ve1 2>/dev/null || true
+    sudo ip link set ve0 netns n0
+    sudo ip link set ve1 netns n1
+    sudo ip -n n0 link set lo up
+    sudo ip -n n1 link set lo up
+    sudo batctl routing_algo {{algo}}
+    sudo ip -n n0 link add {{batif}} type batadv 2>/dev/null || true
+    sudo ip -n n1 link add {{batif}} type batadv 2>/dev/null || true
+    sudo ip -n n0 link set {{batif}} up
+    sudo ip -n n1 link set {{batif}} up
+    sudo ip -n n0 link set ve0 up
+    sudo ip -n n1 link set ve1 up
+    sudo ip -n n0 link set ve0 master {{batif}}
+    sudo ip -n n1 link set ve1 master {{batif}}
+    sudo ip -n n0 addr add 10.0.0.1/24 dev {{batif}} 2>/dev/null || true
+    sudo ip -n n1 addr add 10.0.0.2/24 dev {{batif}} 2>/dev/null || true
+
+# Tear down namespace demo
+ns-down:
+    sudo ip netns del n0 2>/dev/null || true
+    sudo ip netns del n1 2>/dev/null || true
+
+# Test connectivity in the namespace demo
+ns-ping:
+    sudo ip netns exec n0 ping -c 3 10.0.0.2
+
+# Inspect batman state inside the namespace demo
+ns-show:
+    sudo ip netns exec n0 batctl meshif {{batif}} if || true
+    sudo ip netns exec n0 batctl meshif {{batif}} n || true
+    sudo ip netns exec n0 batctl meshif {{batif}} o || true
