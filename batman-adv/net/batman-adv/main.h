@@ -9,7 +9,7 @@
 
 #define BATADV_DRIVER_AUTHOR "Marek Lindner <marek.lindner@mailbox.org>, " \
 			     "Simon Wunderlich <sw@simonwunderlich.de>"
-#define BATADV_DRIVER_DESC   "B.A.T.M.A.N. advanced"
+#define BATADV_DRIVER_DESC   "B.A.T.M.A.N. advanced patched"
 #define BATADV_DRIVER_DEVICE "batman-adv"
 
 #ifndef BATADV_SOURCE_VERSION
@@ -130,14 +130,14 @@
  * enum batadv_mesh_state - State of a mesh interface
  */
 enum batadv_mesh_state {
-	/** @BATADV_MESH_INACTIVE: mesh interface is not yet running */
-	BATADV_MESH_INACTIVE,
+    /** @BATADV_MESH_INACTIVE: mesh interface is not yet running */
+    BATADV_MESH_INACTIVE,
 
-	/** @BATADV_MESH_ACTIVE: interface is up and running */
-	BATADV_MESH_ACTIVE,
+    /** @BATADV_MESH_ACTIVE: interface is up and running */
+    BATADV_MESH_ACTIVE,
 
-	/** @BATADV_MESH_DEACTIVATING: interface is getting shut down */
-	BATADV_MESH_DEACTIVATING,
+    /** @BATADV_MESH_DEACTIVATING: interface is getting shut down */
+    BATADV_MESH_DEACTIVATING,
 };
 
 #define BATADV_BCAST_QUEUE_LEN		256
@@ -147,36 +147,36 @@ enum batadv_mesh_state {
  * enum batadv_uev_action - action type of uevent
  */
 enum batadv_uev_action {
-	/** @BATADV_UEV_ADD: gateway was selected (after none was selected) */
-	BATADV_UEV_ADD = 0,
+    /** @BATADV_UEV_ADD: gateway was selected (after none was selected) */
+    BATADV_UEV_ADD = 0,
 
-	/**
-	 * @BATADV_UEV_DEL: selected gateway was removed and none is selected
-	 * anymore
-	 */
-	BATADV_UEV_DEL,
+    /**
+     * @BATADV_UEV_DEL: selected gateway was removed and none is selected
+     * anymore
+     */
+    BATADV_UEV_DEL,
 
-	/**
-	 * @BATADV_UEV_CHANGE: a different gateway was selected as based gateway
-	 */
-	BATADV_UEV_CHANGE,
+    /**
+     * @BATADV_UEV_CHANGE: a different gateway was selected as based gateway
+     */
+    BATADV_UEV_CHANGE,
 
-	/**
-	 * @BATADV_UEV_LOOPDETECT: loop was detected which cannot be handled by
-	 * bridge loop avoidance
-	 */
-	BATADV_UEV_LOOPDETECT,
+    /**
+     * @BATADV_UEV_LOOPDETECT: loop was detected which cannot be handled by
+     * bridge loop avoidance
+     */
+    BATADV_UEV_LOOPDETECT,
 };
 
 /**
  * enum batadv_uev_type - Type of uevent
  */
 enum batadv_uev_type {
-	/** @BATADV_UEV_GW: selected gateway was modified */
-	BATADV_UEV_GW = 0,
+    /** @BATADV_UEV_GW: selected gateway was modified */
+    BATADV_UEV_GW = 0,
 
-	/** @BATADV_UEV_BLA: bridge loop avoidance event */
-	BATADV_UEV_BLA,
+    /** @BATADV_UEV_BLA: bridge loop avoidance event */
+    BATADV_UEV_BLA,
 };
 
 #define BATADV_GW_THRESHOLD	50
@@ -224,10 +224,10 @@ enum batadv_uev_type {
  */
 static inline int batadv_print_vid(unsigned short vid)
 {
-	if (vid & BATADV_VLAN_HAS_TAG)
-		return (int)(vid & VLAN_VID_MASK);
-	else
-		return -1;
+    if (vid & BATADV_VLAN_HAS_TAG)
+        return (int)(vid & VLAN_VID_MASK);
+    else
+        return -1;
 }
 
 extern struct list_head batadv_hardif_list;
@@ -241,12 +241,12 @@ bool batadv_is_my_mac(struct batadv_priv *bat_priv, const u8 *addr);
 int batadv_max_header_len(void);
 void batadv_skb_set_priority(struct sk_buff *skb, int offset);
 int batadv_batman_skb_recv(struct sk_buff *skb, struct net_device *dev,
-			   struct packet_type *ptype,
-			   struct net_device *orig_dev);
+                           struct packet_type *ptype,
+                           struct net_device *orig_dev);
 int
 batadv_recv_handler_register(u8 packet_type,
-			     int (*recv_handler)(struct sk_buff *,
-						 struct batadv_hard_iface *));
+                             int (*recv_handler)(struct sk_buff *,
+                                     struct batadv_hard_iface *));
 void batadv_recv_handler_unregister(u8 packet_type);
 
 /**
@@ -260,7 +260,7 @@ void batadv_recv_handler_unregister(u8 packet_type);
  */
 static inline bool batadv_compare_eth(const void *data1, const void *data2)
 {
-	return ether_addr_equal_unaligned(data1, data2);
+    return ether_addr_equal_unaligned(data1, data2);
 }
 
 /**
@@ -272,9 +272,9 @@ static inline bool batadv_compare_eth(const void *data1, const void *data2)
  * Return: true if current time is after timestamp + timeout
  */
 static inline bool batadv_has_timed_out(unsigned long timestamp,
-					unsigned int timeout)
+                                        unsigned int timeout)
 {
-	return time_is_before_jiffies(timestamp + msecs_to_jiffies(timeout));
+    return time_is_before_jiffies(timestamp + msecs_to_jiffies(timeout));
 }
 
 /**
@@ -349,9 +349,9 @@ static inline bool batadv_has_timed_out(unsigned long timestamp,
  * Stop preemption on local cpu while incrementing the counter
  */
 static inline void batadv_add_counter(struct batadv_priv *bat_priv, size_t idx,
-				      size_t count)
+                                      size_t count)
 {
-	this_cpu_add(bat_priv->bat_counters[idx], count);
+    this_cpu_add(bat_priv->bat_counters[idx], count);
 }
 
 /**
@@ -375,6 +375,6 @@ static inline void batadv_add_counter(struct batadv_priv *bat_priv, size_t idx,
 unsigned short batadv_get_vid(struct sk_buff *skb, size_t header_len);
 bool batadv_vlan_ap_isola_get(struct batadv_priv *bat_priv, unsigned short vid);
 int batadv_throw_uevent(struct batadv_priv *bat_priv, enum batadv_uev_type type,
-			enum batadv_uev_action action, const char *data);
+                        enum batadv_uev_action action, const char *data);
 
 #endif /* _NET_BATMAN_ADV_MAIN_H_ */
